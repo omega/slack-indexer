@@ -1,4 +1,5 @@
 extern crate iron;
+extern crate router;
 extern crate regex;
 extern crate postgres;
 use postgres::{Connection, SslMode};
@@ -18,6 +19,7 @@ struct IndexedMessage {
 
 use iron::prelude::*;
 use iron::status;
+use router::Router;
 use regex::Regex;
 
 
@@ -89,11 +91,20 @@ fn main() {
         ).unwrap();
     }
 
-    fn hello_world(_: &mut Request) -> IronResult<Response> {
-        println!("Got a request {}", );
+    fn hello_world(request: &mut Request) -> IronResult<Response> {
+        println!("Got a request {}", &request.url.to_string());
+
         Ok(Response::with((status::Ok, "Hello World!")))
     }
 
-    Iron::new(hello_world).http("localhost:3000").unwrap();
+    fn apejens(_: &mut Request) -> IronResult<Response> {
+        println!("Got a apejens request");
+        Ok(Response::with((status::Ok, "Hello, World!")))
+    }
+
+    let mut router = Router::new();
+    router.get("/", hello_world);
+    router.get("/apejens", apejens);
+    Iron::new(router).http("localhost:3000").unwrap();
     println!("On 3000");
 }

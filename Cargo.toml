@@ -6,3 +6,4 @@ authors = ["Andreas Marienborg <omega@palle.net>"]
 iron = "*"
 postgres = "0.8"
 regex = "0.1.8"
+router = "*"

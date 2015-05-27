@@ -1,3 +1,4 @@
+
 extern crate iron;
 extern crate router;
 extern crate regex;
@@ -17,10 +18,13 @@ struct IndexedMessage {
     triggerword: Option<String>
 }
 
+
 use iron::prelude::*;
 use iron::status;
 use router::Router;
 use regex::Regex;
+use std::io::Read;
+use std::collections::HashMap;
 
 
 fn main() {
@@ -91,10 +95,25 @@ fn main() {
         ).unwrap();
     }
 
-    fn hello_world(request: &mut Request) -> IronResult<Response> {
-        println!("Got a request {}", &request.url.to_string());
+    fn hello_world( request: &mut Request) -> IronResult<Response> {
 
-        Ok(Response::with((status::Ok, "Hello World!")))
+        // Getting POST body
+        let mut payload = String::new();
+        request.body.read_to_string(&mut payload).unwrap();
+
+        // Spliting it with `&`
+        let params: Vec<&str> = payload.split('&').collect();
+
+        // Assiging each param with HASHMAP
+        let mut data = HashMap::new();
+        for pair in params.iter() {
+            let key_pair: Vec<&str> = pair.split('=').collect();
+            data.insert( key_pair[0], key_pair[1] );
+            println!("{:?} -> {}", key_pair[0], key_pair[1]);
+        }
+
+        Ok(Response::with((status::Ok, "OK" )))
+
     }
 
     fn apejens(_: &mut Request) -> IronResult<Response> {
@@ -103,7 +122,7 @@ fn main() {
     }
 
     let mut router = Router::new();
-    router.get("/", hello_world);
+    router.post("/", hello_world);
     router.get("/apejens", apejens);
     Iron::new(router).http("localhost:3000").unwrap();
     println!("On 3000");

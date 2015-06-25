@@ -17,14 +17,14 @@ struct IndexedMessage {
     text: String,
     triggerword: Option<String>
 }
+extern crate urlencoded;
+use urlencoded::UrlEncodedBody;
 
 
 use iron::prelude::*;
 use iron::status;
 use router::Router;
 use regex::Regex;
-use std::io::Read;
-use std::collections::HashMap;
 
 
 fn main() {
@@ -95,21 +95,13 @@ fn main() {
         ).unwrap();
     }
 
+
+
     fn hello_world( request: &mut Request) -> IronResult<Response> {
 
-        // Getting POST body
-        let mut payload = String::new();
-        request.body.read_to_string(&mut payload).unwrap();
-
-        // Spliting it with `&`
-        let params: Vec<&str> = payload.split('&').collect();
-
-        // Assiging each param with HASHMAP
-        let mut data = HashMap::new();
-        for pair in params.iter() {
-            let key_pair: Vec<&str> = pair.split('=').collect();
-            data.insert( key_pair[0], key_pair[1] );
-            println!("{:?} -> {}", key_pair[0], key_pair[1]);
+        match request.get_ref::<UrlEncodedBody>() {
+            Ok(ref hashmap) => println!("Parsed body: {:?}", hashmap),
+            Err(ref e) => println!("Error: {:?}", e),
         }
 
         Ok(Response::with((status::Ok, "OK" )))
